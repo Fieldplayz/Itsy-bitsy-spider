@@ -1,0 +1,144 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
+
+public class PlayerNavMesh : MonoBehaviour
+{
+    [SerializeField] private Transform movePositionTransform;
+    private NavMeshAgent  navMeshPlayer;
+    public int health = 2;
+    bool isAlive = true;
+    private Animator spideranim;
+    private bool hit = false;
+    bool isAttacking = false;
+    bool inRange = false;
+    float waitTime = 1.3f;
+    float waitTime2 = 1.85f;
+    int score = 0;
+    
+
+    [SerializeField] float attackRate = 1f;
+    [SerializeField] float nextAttackTime = 0f;
+
+    private bool attackDistance = false;
+    private void Awake()
+    {
+        
+       navMeshPlayer = GetComponent<NavMeshAgent>();
+        spideranim = GetComponent<Animator>();
+    }
+
+    private void Update()
+    {
+        
+
+        if(health <= 0)
+        {
+            navMeshPlayer.ActivateCurrentOffMeshLink(false);
+            spideranim.SetBool("IsDead", true);
+            ScoreSet();
+            Invoke("Despawn", waitTime);
+            
+        }
+        else
+        {
+            if (hit)
+            {
+                navMeshPlayer.ActivateCurrentOffMeshLink(false);
+                Invoke("ResumeWalking", waitTime);
+            }
+            else
+            {
+                navMeshPlayer.destination = movePositionTransform.position;
+                if (navMeshPlayer.velocity.magnitude < 0.001f )
+                {
+                    if (!inRange)
+                    {
+                        Invoke("InRange", waitTime);
+                    }
+                    else
+                    {
+                        if (Time.time >= nextAttackTime && inRange)
+                        {
+                            navMeshPlayer.destination = gameObject.transform.position;
+                            navMeshPlayer.ActivateCurrentOffMeshLink(false);
+                            Attack();
+                            nextAttackTime = Time.time + 2f / attackRate;
+                            inRange = true;
+                            isAttacking = true;
+                        }
+                    }
+                    
+                    
+
+                }
+               
+                    
+            }
+            
+        }
+        
+    }
+    
+
+    void Attack()
+    {
+       
+        spideranim.SetTrigger("Attacking");
+
+        spideranim.SetBool("IsDead", true);
+
+        Invoke("Despawn", waitTime2);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.tag == "Bullet")
+        {
+            health--;
+            spideranim.SetTrigger("Hit");
+            hit = true;
+        }
+        
+
+    }
+
+    void Despawn() 
+    {
+        Destroy(gameObject);
+    }
+
+    void ResumeWalking()
+    {
+        hit = false;
+        navMeshPlayer.ActivateCurrentOffMeshLink(true);
+    }
+
+    void ScoreSet()
+    {
+        if (isAlive)
+        {
+            score = PlayerPrefs.GetInt("Score");
+            score = score + 1;
+            PlayerPrefs.SetInt("Score", score);
+            Debug.Log(score);
+            isAlive = false;
+        }
+        
+    }
+    void InRange()
+    {
+        inRange = true;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if(isAttacking)
+        {
+            other.gameObject.GetComponent<Health>().MinHealth();
+            isAttacking = false;
+        }
+    }
+}
