@@ -33,7 +33,7 @@ public class PlayerNavMesh : MonoBehaviour
     private void Update()
     {
         
-
+        // checkt of de player dood is
         if(health <= 0)
         {
             navMeshPlayer.ActivateCurrentOffMeshLink(false);
@@ -44,6 +44,7 @@ public class PlayerNavMesh : MonoBehaviour
         }
         else
         {
+            // checkt of de spider geraakt is
             if (hit)
             {
                 navMeshPlayer.ActivateCurrentOffMeshLink(false);
@@ -52,6 +53,7 @@ public class PlayerNavMesh : MonoBehaviour
             else
             {
                 navMeshPlayer.destination = movePositionTransform.position;
+                // checkt of hij dicht genoeg bij de player is
                 if (navMeshPlayer.velocity.magnitude < 0.001f )
                 {
                     if (!inRange)
@@ -85,7 +87,7 @@ public class PlayerNavMesh : MonoBehaviour
 
     void Attack()
     {
-       
+       // speelt attack animatie af
         spideranim.SetTrigger("Attacking");
 
         spideranim.SetBool("IsDead", true);
@@ -95,6 +97,7 @@ public class PlayerNavMesh : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // checkt of hij geraakt is door de bullet
         if(other.gameObject.tag == "Bullet")
         {
             health--;
@@ -119,7 +122,8 @@ public class PlayerNavMesh : MonoBehaviour
     void ScoreSet()
     {
         if (isAlive)
-        {
+        { 
+            // Update de score
             score = PlayerPrefs.GetInt("Score");
             score = score + 1;
             PlayerPrefs.SetInt("Score", score);
@@ -137,6 +141,7 @@ public class PlayerNavMesh : MonoBehaviour
     {
         if(isAttacking)
         {
+            // Doet de player damage
             other.gameObject.GetComponent<Health>().MinHealth();
             isAttacking = false;
         }
