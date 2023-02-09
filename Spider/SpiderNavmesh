@@ -33,7 +33,7 @@ public class PlayerNavMesh : MonoBehaviour
     private void Update()
     {
         
-        // checkt of de player dood is
+        // checkt of de spider geen health meer heeft
         if(health <= 0)
         {
             navMeshPlayer.ActivateCurrentOffMeshLink(false);
